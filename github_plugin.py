@@ -65,3 +65,31 @@ class Github:
                 continue
 
         return messages
+
+    @command(permission="view")
+    async def pr(self, mask, target, args):
+        """Display information about given pull requests
+
+        %%pr <id>...
+        """
+
+        messages = []
+        for id_pr in args["<id>"]:
+            if id_pr.startswith("#"):
+                id_pr = id_pr[1:]
+
+            try:
+                id_pr = int(id_pr)
+
+                try:
+                    pr = self.g.get_pull(id_pr)
+                except github.GithubException as e:
+                    self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
+                    continue
+
+                messages.append(f"PR #{id_pr}: {pr.title} - {pr.html_url}")
+            except ValueError:
+                messages.append(f"{mask.nick}: no such pull request")
+                continue
+
+        return messages
