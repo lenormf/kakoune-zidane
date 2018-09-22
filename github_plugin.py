@@ -56,12 +56,14 @@ class Github:
                 try:
                     issue = self.g.get_issue(id_issue)
                 except github.GithubException as e:
-                    self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
-                    continue
-
-                messages.append(f"Issue #{id_issue}: {issue.title} - {issue.html_url}")
+                    if e.status == 404:
+                        messages.append(f"{mask.nick}: no such issue ({id_issue})")
+                    else:
+                        self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
+                else:
+                    messages.append(f"Issue #{id_issue}: {issue.title} - {issue.html_url}")
             except ValueError:
-                messages.append(f"{mask.nick}: no such issue")
+                messages.append(f"{mask.nick}: invalid identifier ({id_issue})")
                 continue
 
         return messages
@@ -84,12 +86,14 @@ class Github:
                 try:
                     pr = self.g.get_pull(id_pr)
                 except github.GithubException as e:
-                    self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
-                    continue
-
-                messages.append(f"PR #{id_pr}: {pr.title} - {pr.html_url}")
+                    if e.status == 404:
+                        messages.append(f"{mask.nick}: no such pull request ({id_pr})")
+                    else:
+                        self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
+                else:
+                    messages.append(f"PR #{id_pr}: {pr.title} - {pr.html_url}")
             except ValueError:
-                messages.append(f"{mask.nick}: no such pull request")
+                messages.append(f"{mask.nick}: invalid identifier ({id_pr})")
                 continue
 
         return messages
