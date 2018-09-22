@@ -1,0 +1,69 @@
+kakoune-zidane
+==============
+
+This project implements a small Github plugin for
+https://github.com/gawel/irc3[irc3], and a configuration file that sets up
+an IRC bot to run on https://github.com/mawww/kakoune[Kakoune]'s channel.
+
+Instructions
+------------
+
+Setup
+~~~~~
+
+Python 3 is required to run the bot.
+
+```sh
+$ git clone https://github.com/lenormf/kakoune-zidane.git
+$ cd kakoune-zidane
+```
+
+The recommended way to run the bot is by setting up a virtual environment,
+but this step is optional:
+
+```sh
+$ python3 -m venv .env
+$ source .env/bin/activate
+```
+
+Install the dependencies in the `requirements.txt` file, either manually
+or using the `pip` package manager:
+
+```sh
+$ pip3 install -r requirements.txt
+```
+
+Configuration
+~~~~~~~~~~~~~
+
+Create a dedicated access token on your https://github.com/settings/tokens[Github profile], and grant it the following permissions:
+
+* `public_repo`
+
+Once successfully created, declare this token (which should be kept secret)
+in the bot's configuration file:
+
+```ini
+# zidane.cfg
+
+[github_plugin]
+
+token = <token>
+```
+
+In order to enable debug messages on the console, add `debug = true` in
+the above section.
+
+Tweak other `irc3` settings if necessary.
+
+Running
+~~~~~~~
+
+Use the following command to start the bot:
+
+```sh
+$ irc3 zidane.cfg
+```
+
+Refer to the documentation of `irc3` to learn more about additional flags
+(e.g. `-d` for debugging).
