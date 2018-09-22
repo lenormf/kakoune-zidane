@@ -42,7 +42,7 @@ class Github:
         except github.GithubException as e:
             raise RuntimeError("Unable to fetch the target repository: %s (%s)" % (e.data["message"], e.status))
 
-    @command(permission="view")
+    @command(permission="view", aliases=["i"])
     async def issue(self, mask, target, args):
         """Display information about given issues
 
