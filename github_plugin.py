@@ -28,6 +28,9 @@ class Github:
         token = bot.config["github_plugin"]["token"]
         repository = bot.config["github_plugin"]["repository"]
 
+        if "debug" in bot.config["github_plugin"] and bot.config["github_plugin"]["debug"]:
+            github.enable_console_debug_logging()
+
         try:
             self.g = github.Github(token)
         except github.GithubException as e:
