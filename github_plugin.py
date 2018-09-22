@@ -29,6 +29,10 @@ class Github:
         self.token = bot.config["github_plugin"]["token"]
         self.repository = bot.config["github_plugin"]["repository"]
 
+        self.max_search_results = 3
+        if "max_search_results" in bot.config["github_plugin"]:
+            self.max_search_results = bot.config["github_plugin"]["max_search_results"]
+
         if "debug" in bot.config["github_plugin"] and bot.config["github_plugin"]["debug"]:
             github.enable_console_debug_logging()
 
@@ -136,7 +140,7 @@ class Github:
         messages = []
         try:
             issues = self.github.search_issues(query=" ".join(query), sort="created", order="desc", **qualifiers)
-            for issue in issues[:3]:
+            for issue in issues[:self.max_search_results]:
                 messages.append("%s #%d: %s - %s" % ("Pull Request" if issue.pull_request else "Issue", issue.number, issue.title, issue.html_url))
         except github.GithubException as e:
             self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
