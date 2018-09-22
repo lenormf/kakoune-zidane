@@ -48,6 +48,8 @@ class Github:
         %%issue <id>...
         """
 
+        self.bot.log.debug("User %s is searching issues: %s", mask.nick, (mask, target, args))
+
         messages = []
         for id_issue in args["<id>"]:
             if id_issue.startswith("#"):
@@ -77,6 +79,8 @@ class Github:
 
         %%pr <id>...
         """
+
+        self.bot.log.debug("User %s is searching pull requests: %s", mask.nick, (mask, target, args))
 
         messages = []
         for id_pr in args["<id>"]:
