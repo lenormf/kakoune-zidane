@@ -113,7 +113,7 @@ class Github:
 
         return self._prefix_messages(messages, f"{mask.nick}: ")
 
-    def _search(self, args, issue=True, pr=True):
+    def _search(self, nickname, args, issue=True, pr=True):
         qualifiers = {
             "repo": self.repository,
             "in": "title,body,comments",
@@ -135,6 +135,9 @@ class Github:
                 continue
 
             if si[0] in ["author", "commenter", "involves", "state"]:
+                if si[0] in ["author", "commenter", "involves"] and si[1].lower() == "me":
+                    si[1] = nickname
+
                 qualifiers[si[0]] = si[1]
             else:
                 query.append(i)
@@ -164,7 +167,7 @@ class Github:
         %%search <query>...
         """
 
-        results = self._search(args["<query>"], issue=True, pr=True)
+        results = self._search(mask.nick, args["<query>"], issue=True, pr=True)
         if results is None:
             results = ["An error occured while fetching results"]
         elif not results:
@@ -179,7 +182,7 @@ class Github:
         %%search_issue <query>...
         """
 
-        results = self._search(args["<query>"], issue=True, pr=False)
+        results = self._search(mask.nick, args["<query>"], issue=True, pr=False)
         if results is None:
             results = ["An error occured while fetching results"]
         elif not results:
@@ -194,7 +197,7 @@ class Github:
         %%search_pr <query>...
         """
 
-        results = self._search(args["<query>"], issue=False, pr=True)
+        results = self._search(mask.nick, args["<query>"], issue=False, pr=True)
         if results is None:
             results = ["An error occured while fetching results"]
         elif not results:
