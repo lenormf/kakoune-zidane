@@ -105,3 +105,86 @@ class Github:
                 continue
 
         return messages
+
+    def _search(self, args, issue=True, pr=True):
+        qualifiers = {
+            "repo": self.repository,
+            "in": "title,body,comments",
+        }
+        query = []
+
+        if issue ^ pr:
+            qualifiers["type"] = "issue" if issue else "pr"
+
+        for i in args:
+            si = i.split(":", 1)
+            if len(si) < 2:
+                query.append(i)
+                continue
+
+            si[1] = si[1].strip()
+            if not len(si[1]):
+                query.append(i)
+                continue
+
+            if si[0] in ["author", "commenter", "involves", "state"]:
+                qualifiers[si[0]] = si[1]
+            else:
+                query.append(i)
+                continue
+
+        messages = []
+        try:
+            issues = self.github.search_issues(query=" ".join(query), sort="created", order="desc", **qualifiers)
+            for issue in issues[:3]:
+                messages.append("%s #%d: %s - %s" % ("Pull Request" if issue.pull_request else "Issue", issue.number, issue.title, issue.html_url))
+        except github.GithubException as e:
+            self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
+            return None
+
+        return messages
+
+    @command(permission="view", aliases=["s"])
+    async def search(self, mask, target, args):
+        """Search issues and pull requests
+
+        %%search <query>...
+        """
+
+        results = self._search(args["<query>"], issue=True, pr=True)
+        if results is None:
+            return ["An error occured while fetching results"]
+        elif not results:
+            return [f"{mask.nick}: no results found"]
+
+        return results
+
+    @command(permission="view", aliases=["si"])
+    async def search_issue(self, mask, target, args):
+        """Search issues
+
+        %%search_issue <query>...
+        """
+
+        results = self._search(args["<query>"], issue=True, pr=False)
+        if results is None:
+            return ["An error occured while fetching results"]
+        elif not results:
+            return [f"{mask.nick}: no results found"]
+
+        return results
+
+    @command(permission="view", aliases=["spr"])
+    async def search_pr(self, mask, target, args):
+        """Search pull requests
+
+        %%search_pr <query>...
+        """
+
+        results = self._search(args["<query>"], issue=False, pr=True)
+        if results is None:
+            return ["An error occured while fetching results"]
+        elif not results:
+            return [f"{mask.nick}: no results found"]
+
+        return results
