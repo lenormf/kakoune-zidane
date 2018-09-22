@@ -16,6 +16,7 @@ class Github:
 
     def __init__(self, bot):
         self.bot = bot
+        self.log = bot.log
 
         if "github_plugin" not in bot.config:
             raise RuntimeError("No [github_plugin] section set in the configuration")
@@ -48,7 +49,7 @@ class Github:
         %%issue <id>...
         """
 
-        self.bot.log.debug("User %s is searching issues: %s", mask.nick, (mask, target, args))
+        self.log.debug("User %s is searching issues: %s", mask.nick, (mask, target, args))
 
         messages = []
         for id_issue in args["<id>"]:
@@ -64,7 +65,7 @@ class Github:
                     if e.status == 404:
                         messages.append(f"{mask.nick}: no such issue ({id_issue})")
                     else:
-                        self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
+                        self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
                 else:
                     messages.append(f"Issue #{id_issue}: {issue.title} - {issue.html_url}")
             except ValueError:
@@ -80,7 +81,7 @@ class Github:
         %%pr <id>...
         """
 
-        self.bot.log.debug("User %s is searching pull requests: %s", mask.nick, (mask, target, args))
+        self.log.debug("User %s is searching pull requests: %s", mask.nick, (mask, target, args))
 
         messages = []
         for id_pr in args["<id>"]:
@@ -96,7 +97,7 @@ class Github:
                     if e.status == 404:
                         messages.append(f"{mask.nick}: no such pull request ({id_pr})")
                     else:
-                        self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
+                        self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
                 else:
                     messages.append(f"PR #{id_pr}: {pr.title} - {pr.html_url}")
             except ValueError:
