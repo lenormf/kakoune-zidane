@@ -143,8 +143,14 @@ class Github:
         messages = []
         try:
             issues = self.github.search_issues(query=" ".join(query), sort="created", order="desc", **qualifiers)
-            for issue in issues[:self.max_search_results]:
+            n = 0
+            for issue in issues:
+                n += 1
+
                 messages.append("%s #%d: %s - %s" % ("Pull Request" if issue.pull_request else "Issue", issue.number, issue.title, issue.html_url))
+
+                if n >= self.max_search_results:
+                    break
         except github.GithubException as e:
             self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
             return None
