@@ -47,7 +47,7 @@ class Github:
             raise RuntimeError("Unable to fetch the target repository: %s (%s)" % (e.data["message"], e.status))
 
     def _prefix_messages(self, messages, prefix):
-        return [f"{prefix}{v}" for v in messages]
+        return ["%s%s" % (prefix, v) for v in messages]
 
     @command(permission="view", aliases=["i"])
     async def issue(self, mask, target, args):
@@ -70,16 +70,16 @@ class Github:
                     issue = self.repo.get_issue(id_issue)
                 except github.GithubException as e:
                     if e.status == 404:
-                        messages.append(f"no such issue ({id_issue})")
+                        messages.append("no such issue (%d)" % id_issue)
                     else:
                         self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
                 else:
-                    messages.append(f"Issue #{id_issue}: {issue.title} - {issue.html_url}")
+                    messages.append("Issue #%d: %s - %s" % (issue.number, issue.title, issue.html_url))
             except ValueError:
-                messages.append(f"invalid identifier ({id_issue})")
+                messages.append("invalid identifier (%d)" % id_issue)
                 continue
 
-        return self._prefix_messages(messages, f"{mask.nick}: ")
+        return self._prefix_messages(messages, "%s: " % mask.nick)
 
     @command(permission="view")
     async def pr(self, mask, target, args):
@@ -102,16 +102,16 @@ class Github:
                     pr = self.repo.get_pull(id_pr)
                 except github.GithubException as e:
                     if e.status == 404:
-                        messages.append(f"no such pull request ({id_pr})")
+                        messages.append("no such pull request (%d)" % id_pr)
                     else:
                         self.log.error("Github API error: %s (%s)", e.data["message"], e.status)
                 else:
-                    messages.append(f"PR #{id_pr}: {pr.title} - {pr.html_url}")
+                    messages.append("Pull Request #%d: %s - %s" % (pr.number, pr.title, pr.html_url))
             except ValueError:
-                messages.append(f"invalid identifier ({id_pr})")
+                messages.append("invalid identifier (%d)" % id_pr)
                 continue
 
-        return self._prefix_messages(messages, f"{mask.nick}: ")
+        return self._prefix_messages(messages, "%s: " % mask.nick)
 
     def _search(self, nickname, args, issue=True, pr=True):
         qualifiers = {
@@ -173,7 +173,7 @@ class Github:
         elif not results:
             results = ["no results found"]
 
-        return self._prefix_messages(results, f"{mask.nick}: ")
+        return self._prefix_messages(results, "%s: " % mask.nick)
 
     @command(permission="view", aliases=["si"])
     async def search_issue(self, mask, target, args):
@@ -188,7 +188,7 @@ class Github:
         elif not results:
             results = ["no results found"]
 
-        return self._prefix_messages(results, f"{mask.nick}: ")
+        return self._prefix_messages(results, "%s: " % mask.nick)
 
     @command(permission="view", aliases=["spr"])
     async def search_pr(self, mask, target, args):
@@ -203,4 +203,4 @@ class Github:
         elif not results:
             results = ["no results found"]
 
-        return self._prefix_messages(results, f"{mask.nick}: ")
+        return self._prefix_messages(results, "%s: " % mask.nick)
