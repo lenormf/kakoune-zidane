@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+#
+# github_plugin.py for zidane
+# by lenormf
+#
+
+from irc3.plugins.command import command
+import irc3
+
+import github
+
+
+@irc3.plugin
+class Github:
+    requires = ["irc3.plugins.log"]
+
+    def __init__(self, bot):
+        self.bot = bot
+
+        if "github_plugin" not in bot.config:
+            raise RuntimeError("No [github_plugin] section set in the configuration")
+        else:
+            if "token" not in bot.config["github_plugin"]:
+                raise RuntimeError("No Github API token declared")
+            elif "repository" not in bot.config["github_plugin"]:
+                raise RuntimeError("No target repository declared")
+
+        token = bot.config["github_plugin"]["token"]
+        repository = bot.config["github_plugin"]["repository"]
+
+        try:
+            self.g = github.Github(token)
+        except github.GithubException as e:
+            raise RuntimeError("Unable to initialize the Github API wrapper: %s (%s)" % (e.data["message"], e.status))
+
+        try:
+            self.g = self.g.get_repo(repository)
+        except github.GithubException as e:
+            raise RuntimeError("Unable to fetch the target repository: %s (%s)" % (e.data["message"], e.status))
+
+    @command(permission="view")
+    async def issue(self, mask, target, args):
+        """Display information about given issues
+
+        %%issue <id>...
+        """
+
+        messages = []
+        for id_issue in args["<id>"]:
+            if id_issue.startswith("#"):
+                id_issue = id_issue[1:]
+
+            try:
+                id_issue = int(id_issue)
+
+                try:
+                    issue = self.g.get_issue(id_issue)
+                except github.GithubException as e:
+                    self.bot.log.error("Github API error: %s (%s)" % (e.data["message"], e.status))
+                    continue
+
+                messages.append(f"Issue #{id_issue}: {issue.title} - {issue.html_url}")
+            except ValueError:
+                messages.append(f"{mask.nick}: no such issue")
+                continue
+
+        return messages
