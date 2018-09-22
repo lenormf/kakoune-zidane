@@ -33,12 +33,12 @@ class Github:
             github.enable_console_debug_logging()
 
         try:
-            self.g = github.Github(self.token)
+            self.github = github.Github(self.token)
         except github.GithubException as e:
             raise RuntimeError("Unable to initialize the Github API wrapper: %s (%s)" % (e.data["message"], e.status))
 
         try:
-            self.g = self.g.get_repo(self.repository)
+            self.repo = self.github.get_repo(self.repository)
         except github.GithubException as e:
             raise RuntimeError("Unable to fetch the target repository: %s (%s)" % (e.data["message"], e.status))
 
@@ -60,7 +60,7 @@ class Github:
                 id_issue = int(id_issue)
 
                 try:
-                    issue = self.g.get_issue(id_issue)
+                    issue = self.repo.get_issue(id_issue)
                 except github.GithubException as e:
                     if e.status == 404:
                         messages.append(f"{mask.nick}: no such issue ({id_issue})")
@@ -92,7 +92,7 @@ class Github:
                 id_pr = int(id_pr)
 
                 try:
-                    pr = self.g.get_pull(id_pr)
+                    pr = self.repo.get_pull(id_pr)
                 except github.GithubException as e:
                     if e.status == 404:
                         messages.append(f"{mask.nick}: no such pull request ({id_pr})")
