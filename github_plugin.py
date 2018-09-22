@@ -33,7 +33,7 @@ class Github:
         if "max_search_results" in bot.config["github_plugin"]:
             self.max_search_results = bot.config["github_plugin"]["max_search_results"]
 
-        if "debug" in bot.config["github_plugin"] and bot.config["github_plugin"]["debug"]:
+        if bot.config["debug"]:
             github.enable_console_debug_logging()
 
         try:

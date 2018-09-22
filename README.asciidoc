@@ -51,9 +51,6 @@ in the bot's configuration file:
 token = <token>
 ```
 
-In order to enable debug messages on the console, add `debug = true` in
-the above section.
-
 Tweak other `irc3` settings if necessary.
 
 Running
