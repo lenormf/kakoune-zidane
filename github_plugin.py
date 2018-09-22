@@ -26,19 +26,19 @@ class Github:
             elif "repository" not in bot.config["github_plugin"]:
                 raise RuntimeError("No target repository declared")
 
-        token = bot.config["github_plugin"]["token"]
-        repository = bot.config["github_plugin"]["repository"]
+        self.token = bot.config["github_plugin"]["token"]
+        self.repository = bot.config["github_plugin"]["repository"]
 
         if "debug" in bot.config["github_plugin"] and bot.config["github_plugin"]["debug"]:
             github.enable_console_debug_logging()
 
         try:
-            self.g = github.Github(token)
+            self.g = github.Github(self.token)
         except github.GithubException as e:
             raise RuntimeError("Unable to initialize the Github API wrapper: %s (%s)" % (e.data["message"], e.status))
 
         try:
-            self.g = self.g.get_repo(repository)
+            self.g = self.g.get_repo(self.repository)
         except github.GithubException as e:
             raise RuntimeError("Unable to fetch the target repository: %s (%s)" % (e.data["message"], e.status))
 
