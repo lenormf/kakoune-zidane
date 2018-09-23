@@ -145,8 +145,8 @@ class Github:
                 "mentions": lambda x: nickname if x == "me" else x,
                 "commenter": lambda x: nickname if x == "me" else x,
                 "involves": lambda x: nickname if x == "me" else x,
-                "state": lambda x: x if reduce(lambda acc, i: acc and (i in ["open", "closed"] or not i), qualifier_value.split(","), True) else None,
-                "is": lambda x: x if reduce(lambda acc, i: acc and (i in ["open", "closed", "merged"] or not i), qualifier_value.split(","), True) else None,
+                "state": lambda x: x if reduce(lambda acc, i: acc and (i in ["open", "closed"] or not i), x.split(","), True) else None,
+                "is": lambda x: x if reduce(lambda acc, i: acc and (i in ["open", "closed", "merged"] or not i), x.split(","), True) else None,
             }
 
             qualifier = sarg[0]
