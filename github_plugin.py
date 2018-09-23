@@ -4,6 +4,8 @@
 # by lenormf
 #
 
+from functools import reduce
+
 from irc3.plugins.command import command
 import irc3
 
@@ -114,38 +116,55 @@ class Github:
         return self._prefix_messages(messages, "%s: " % mask.nick)
 
     def _search(self, nickname, args, issue=True, pr=True):
-        qualifiers = {
+        query_qualifiers = {
             "repo": self.repository,
             "in": "title,body,comments",
         }
         query = []
 
         if issue ^ pr:
-            qualifiers["type"] = "issue" if issue else "pr"
+            query_qualifiers["type"] = "issue" if issue else "pr"
 
-        for i in args:
-            si = i.split(":", 1)
-            if len(si) < 2:
-                query.append(i)
+        for arg in args:
+            sarg = arg.split(":", 1)
+            if len(sarg) < 2:
+                query.append(arg)
                 continue
 
-            si[1] = si[1].strip()
-            if not len(si[1]):
-                query.append(i)
+            qualifier_value = sarg[1].strip()
+            if not qualifier_value:
+                self.log.debug("Qualifier has no value, assuming query token: %s", qualifier_value)
+                query.append(arg)
                 continue
 
-            if si[0] in ["author", "commenter", "involves", "state"]:
-                if si[0] in ["author", "commenter", "involves"] and si[1].lower() == "me":
-                    si[1] = nickname
+            # XXX: https://developer.github.com/v3/search/#parameters-3
+            supported_qualifiers = {
+                "in": lambda x: x if reduce(lambda acc, i: acc and (i in ["title", "body", "comments"] or not i), x.split(","), True) else None,
+                "author": lambda x: nickname if x == "me" else x,
+                "assignee": lambda x: nickname if x == "me" else x,
+                "mentions": lambda x: nickname if x == "me" else x,
+                "commenter": lambda x: nickname if x == "me" else x,
+                "involves": lambda x: nickname if x == "me" else x,
+                "state": lambda x: x if reduce(lambda acc, i: acc and (i in ["open", "closed"] or not i), qualifier_value.split(","), True) else None,
+                "is": lambda x: x if reduce(lambda acc, i: acc and (i in ["open", "closed", "merged"] or not i), qualifier_value.split(","), True) else None,
+            }
 
-                qualifiers[si[0]] = si[1]
+            qualifier = sarg[0]
+            if qualifier in supported_qualifiers:
+                pred = supported_qualifiers[qualifier]
+                pred_value = pred(qualifier_value)
+
+                # NOTE: value qualifier names with erroneous values are completely dropped from the query
+                if pred_value is not None:
+                    query_qualifiers[qualifier] = pred_value
+                else:
+                    self.log.debug("Invalid qualifier value: %s", qualifier_value)
             else:
-                query.append(i)
-                continue
+                self.log.debug("Unsupported qualifier: %s", qualifier)
 
         messages = []
         try:
-            issues = self.github.search_issues(query=" ".join(query), sort="created", order="desc", **qualifiers)
+            issues = self.github.search_issues(query=" ".join(query), sort="created", order="desc", **query_qualifiers)
             n = 0
             for issue in issues:
                 n += 1
