@@ -55,7 +55,7 @@ class Github:
     async def issue(self, mask, target, args):
         """Display information about given issues
 
-        %%issue <id>...
+           %%issue <id>...
         """
 
         self.log.debug("User %s is searching issues: %s", mask.nick, (mask, target, args))
@@ -87,7 +87,7 @@ class Github:
     async def pr(self, mask, target, args):
         """Display information about given pull requests
 
-        %%pr <id>...
+           %%pr <id>...
         """
 
         self.log.debug("User %s is searching pull requests: %s", mask.nick, (mask, target, args))
@@ -183,7 +183,9 @@ class Github:
     async def search(self, mask, target, args):
         """Search issues and pull requests
 
-        %%search <query>...
+           %%search <query>...
+
+           Supported qualifiers: in, author, assignee, mentions, commenter, involves, state, is
         """
 
         results = self._search(mask.nick, args["<query>"], issue=True, pr=True)
@@ -198,7 +200,9 @@ class Github:
     async def search_issue(self, mask, target, args):
         """Search issues
 
-        %%search_issue <query>...
+           %%search_issue <query>...
+
+           Supported qualifiers: in, author, assignee, mentions, commenter, involves, state, is
         """
 
         results = self._search(mask.nick, args["<query>"], issue=True, pr=False)
@@ -213,7 +217,9 @@ class Github:
     async def search_pr(self, mask, target, args):
         """Search pull requests
 
-        %%search_pr <query>...
+           %%search_pr <query>...
+
+           Supported qualifiers: in, author, assignee, mentions, commenter, involves, state, is
         """
 
         results = self._search(mask.nick, args["<query>"], issue=False, pr=True)
